@@ -1,0 +1,157 @@
+#! /bin/bash
+
+BUILD_DIR=`pwd`
+SKT_BIN=$BUILD_DIR/bin/skytime
+SKT_CONF=$BUILD_DIR/conf/skytime.conf
+SKT_PID=$BUILD_DIR/log/skytime.pid
+
+PROCESS_NAME=skytime
+ARGS=$@
+
+# Terminate and rerun the main Go program
+function restart {
+	if [ "$(pidof $PROCESS_NAME)" ]; then
+		killall -q -w -9 $PROCESS_NAME
+  	fi  
+	echo ">> Reloading..."
+}
+
+wait_for_pid () {
+	try=0
+
+	while test $try -lt 35 ; do
+
+		case "$1" in
+			'created')
+			if [ -f "$2" ] ; then
+				try=''
+				break
+			fi
+			;;
+
+			'removed')
+			if [ ! -f "$2" ] ; then
+				try=''
+				break
+			fi
+			;;
+		esac
+
+		echo -n .
+		try=`expr $try + 1`
+		sleep 1
+
+	done
+
+}
+
+case "$1" in
+	start)
+		echo -n "Starting skytime "
+
+		$SKT_BIN -grace true
+
+		if [ "$?" != 0 ] ; then
+			echo " failed"
+			exit 1
+		fi
+
+		wait_for_pid created $SKT_PID
+
+		if [ -n "$try" ] ; then
+			echo " failed"
+			exit 1
+		else
+			echo " done"
+		fi
+	;;
+
+	stop)
+		echo -n "Shutting down skytime"
+
+		if [ ! -r $SKT_PID ] ; then
+			echo "warning, no pid file found - skytime is not running ?"
+			exit 1
+		fi
+
+		kill -TERM `cat $SKT_PID`
+		#kill -INT `cat $SKT_PID`
+
+		wait_for_pid removed $SKT_PID
+
+		if [ -n "$try" ] ; then
+			echo " failed"
+			exit 1
+		else
+			echo " done"
+		fi
+	;;
+
+	quit)
+		echo -n "Gracefully shutting down skytime"
+
+		if [ ! -r $SKT_PID ] ; then
+			echo "warning, no pid file found - skytime is not running ?"
+			exit 1
+		fi
+
+		kill -QUIT `cat $SKT_PID`
+
+		wait_for_pid removed $SKT_PID
+
+		if [ -n "$try" ] ; then
+			echo " failed"
+			exit 1
+		else
+			echo " done"
+		fi
+	;;
+
+	restart)
+		$0 stop
+		$0 start
+	;;
+
+	reload)
+
+		echo -n "Reload service skytime"
+
+		if [ ! -r $SKT_PID ] ; then
+			echo "warning, no pid file found - skytime is not running ?"
+			exit 1
+		fi
+
+	#	kill -USR2 `cat $SKT_PID`
+		kill -HUP `cat $SKT_PID`
+	#	wait_for_pid removed $SKT_PID
+
+		if [ -n "$try" ] ; then
+			echo " failed"
+			exit 1
+		else
+			echo " done"
+		fi
+
+		echo " done"
+	;;
+
+	logrotate)
+
+		echo -n "Re-opening skytime log file "
+
+		if [ ! -r $SKT_PID ] ; then
+			echo "warning, no pid file found - skytime is not running ?"
+			exit 1
+		fi
+
+		kill -USR2 `cat $SKT_PID`
+
+		echo " done"
+	;;
+
+	*)
+		echo "Usage: $0 {start|stop|quit|restart|reload|logrotate}"
+		exit 1
+	;;
+
+esac

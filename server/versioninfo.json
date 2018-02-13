@@ -1,0 +1,44 @@
+{
+	"FixedFileInfo":
+	{
+		"FileVersion": {
+			"Major": 1,
+			"Minor": 0,
+			"Patch": 0,
+			"Build": 1002
+		},
+		"ProductVersion": {
+			"Major": 1,
+			"Minor": 0,
+			"Patch": 0,
+			"Build": 1002
+		},
+		"FileFlagsMask": "3f",
+		"FileFlags ": "00",
+		"FileOS": "040004",
+		"FileType": "01",
+		"FileSubType": "00"
+	},
+	"StringFileInfo":
+	{
+		"Comments": "",
+		"CompanyName": "360企业安全集团",
+		"FileDescription": "360天擎6",
+		"FileVersion": "1.0.0.1001",
+		"InternalName": "skytime.exe",
+		"LegalCopyright": "(C) 360.cn All Rights Reserved",
+		"LegalTrademarks": "",
+		"OriginalFilename": "skytime.exe",
+		"PrivateBuild": "",
+		"ProductName": "360天擎",
+		"ProductVersion": "1.0.0.1001",
+		"SpecialBuild": ""
+	},	
+	"VarFileInfo":
+	{
+		"Translation": {
+			"LangID": 2052,
+			"CharsetID": 936
+		}
+	}
+}

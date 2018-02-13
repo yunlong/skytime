@@ -1,0 +1,355 @@
+<!doctype html>
+<html class="no-js" ng-app="skytimeControllers">
+  <head>
+    <meta charset="utf-8">
+    <title>SkyTime</title>
+    <style type="text/css">
+      .panel-heading {
+          overflow: hidden;
+          padding-top: 20px;
+      }
+      .btn-group {
+          position: relative;
+      }
+
+      td {
+        vertical-align: middle !important;
+      }
+
+      .control-label {
+        padding-top: 0;
+        padding-bottom: 5px;
+      }
+
+      .modal-body {
+        padding-top: 5px !important;
+      }
+
+	  .large-Modal .modal-dialog{
+		width:50%;
+		height: 50%;
+		margin: auto
+	  }
+
+    </style>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css(.tmp) styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+  </head>
+  <body>
+    <!--[if lt IE 10]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+    
+	<script type="text/ng-template" id="slotInfoModal">
+        <div class="modal-header">
+            <h4 class="modal-title">房间详情</h4>
+        </div>
+        <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+		  	<!--
+            <h4> Room Status <button ng-click="refresh()" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-refresh"></span></button> </h4>
+			-->
+            <table ng-if="peers.length > 0" class="table table-bordered">
+              <tbody>
+                <thead>
+                  <tr>
+                    <th>终端mid</th>
+                    <th>终端地址</th>
+                    <th>终端状态</th>
+                  </tr>
+                </thead>
+                <tr ng-repeat="peer in peers">
+                  <td> [[ peer.peer_id ]] </td>
+                  <td> [[ peer.peer_addr ]] </td>
+                  <td ng-switch="peer.peer_status">
+                    <span class="label label-success" ng-switch-when="online">[[ peer.peer_status ]]</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <h5 ng-if="peers.length == 0" class="text-muted">No peers</h5>
+          </div>
+        </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-warning" ng-click="ok()">确定</button>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="broadcastAllModal">
+        <div class="modal-header">
+            <h4 class="modal-title">广播到所有房间</h4>
+        </div>
+        <div class="modal-body">
+            <form novalidate="novalidate" class="form-horizontal">
+              <div class="control-group">
+                  <label class="control-label">输入广播数据:</label>
+                  <div class="controls">
+                      <input class="form-control" type="text" ng-model="broadmsg"/>
+                  </div>
+              </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default" ng-click="ok(broadmsg)">确定</button>
+            <button class="btn btn-warning" ng-click="cancel()">取消</button>
+        </div>
+    </script>
+
+
+    <script type="text/ng-template" id="broadcastRangeSetModal">
+        <div class="modal-header">
+            <h4 class="modal-title">广播到指定范围的房间</h4>
+        </div>
+        <div class="modal-body">
+            <form novalidate="novalidate" class="form-horizontal">
+              <div class="control-group">
+                  <label class="control-label">起始编号</label>
+                  <div class="controls">
+                      <input class="form-control" type="number" ng-model="task.from"/>
+                  </div>
+              </div>
+
+              <div class="control-group">
+                  <label class="control-label">截止编号</label>
+                  <div class="controls">
+                      <input class="form-control" type="number" ng-model="task.to"/>
+                  </div>
+              </div>
+
+              <div class="control-group">
+                  <label class="control-label">广播数据</label>
+                  <div class="controls">
+                      <input class="form-control" type="text" ng-model="task.msg"/>
+                  </div>
+              </div>
+
+          </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default" ng-click="ok(task)">确定</button>
+            <button class="btn btn-warning" ng-click="cancel()">取消</button>
+        </div>
+    </script>
+
+
+    <script type="text/ng-template" id="broadcastSetModal">
+        <div class="modal-header">
+            <h4 class="modal-title">广播到指定的房间列表</h4>
+        </div>
+        <div class="modal-body">
+            <form novalidate="novalidate" class="form-horizontal">
+              <div class="control-group">
+                  <label class="control-label"> 房间编号(多个房间编号以逗号分隔)</label>
+                  <div class="controls">
+                      <input class="form-control" type="text" ng-model="task.from"/>
+                  </div>
+              </div>
+
+              <div class="control-group">
+                  <label class="control-label"> 广播数据 </label>
+                  <div class="controls">
+                      <input class="form-control" type="text" ng-model="task.msg"/>
+                  </div>
+              </div>
+
+          </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default" ng-click="ok(task)">确定</button>
+            <button class="btn btn-warning" ng-click="cancel()">取消</button>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="broadPeersModal">
+        <div class="modal-header">
+            <h4 class="modal-title">广播到指定终端列表</h4>
+        </div>
+        <div class="modal-body">
+            <form novalidate="novalidate" class="form-horizontal">
+              <input type="hidden" ng-model="task.peers" ng-value=""/>
+              <div class="control-group">
+                  <label class="control-label">终端列表(mid以逗号分隔)</label>
+                  <div class="controls">
+                    <input class="form-control" type="text" ng-model="task.peers"/>
+                  </div>
+              </div>
+              <div class="control-group">
+                  <label class="control-label"> 广播数据 </label>
+                  <div class="controls">
+                      <input class="form-control" type="text" ng-model="task.br_msg"/>
+                  </div>
+              </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default" ng-click="ok(task)">确定</button>
+            <button class="btn btn-warning" ng-click="cancel()">取消</button>
+        </div>
+    </script>
+
+    <!-- contents -->
+    <div class="navbar navbar-default navbar-static-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+		  <a class="navbar-brand" href="#">长连接基础服务SkyTime</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+			<!--
+            <li class=""><a href="slots.html" target="_blank">Room</a></li>
+			-->
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Server Rooms -->
+      <div ng-controller="skytimeOverviewCtl" ng-cloak>
+        <div class="row">
+          <div class="col-md-4">
+            <h4> 概览 <button ng-click="refresh()" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-refresh"></span></button> </h4>
+            <table class="table table-bordered">
+              <tbody>
+                <tr>
+                  <td> 产品名称 </td> <td> <b>[[ product ]]</b> </td>
+                </tr>
+                <tr>
+                  <td> 房间数 </td> <td> [[ hub_room_cnt ]] </td>
+                </tr>
+                <tr>
+                  <td> 在线终端 </td> <td> [[ online_peer_cnt ]] </td>
+                </tr>
+                <tr>
+                  <td> 累计广播消息总数 </td> <td> [[ total_br_msg_cnt ]] </td>
+                </tr>
+                <tr>
+                  <td> 累计广播消息流量 </td> <td> [[ total_br_msg_size ]] bytes </td>
+                </tr>
+                <tr>
+                  <td> 广播消息平均耗时 </td> <td> [[ br_msg_avg_time ]] milliseconds </td>
+                </tr> 
+                <tr>
+                  <td> 广播消息平均速率 </td> <td> [[ ops ]] OP/s </td>
+                </tr> 
+                <tr>
+                  <td> 服务器CPU核数 </td> <td> [[ cpu_cores ]] </td>
+                </tr>
+                <tr>
+                  <td> 并发启用协程数 </td> <td> [[ go_routines ]] </td>
+                </tr>
+                <tr>
+                  <td> golang版本 </td> <td> [[ go_version ]] </td>
+                </tr>
+                <tr>
+                  <td> 服务进程ID </td> <td> [[ process_id ]] </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="col-md-8"><highchart config="chartOps"></highchart></div>
+        </div>
+      </div>
+
+	  <!-- Hub Room List -->
+      <div ng-controller="skytimeServerGroupMainCtl" ng-cloak>
+        <div class="row">
+          <div class="col-md-12">
+            <h4> 房间列表 <button ng-click="refresh()" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-refresh"></span></button></h4>
+            <p>
+              <button class="btn btn-sm btn-primary" ng-click="broadcastAllRoom()"><span class="glyphicon glyphicon-plus"></span> 广播到所有房间列表 </button>
+              <button class="btn btn-sm btn-primary" ng-click="rangeSet()"><span class="glyphicon glyphicon-plus"></span> 广播到指定范围房间列表 </button>
+              <button class="btn btn-sm btn-primary" ng-click="broadSet()"><span class="glyphicon glyphicon-plus"></span> 广播到指定的房间列表 </button>
+              <button class="btn btn-sm btn-primary" ng-click="broadPeers()"><span class="glyphicon glyphicon-plus"></span> 广播到指定终端列表</button>
+            </p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+					  <!--<b>room_[[ group.id ]]</b>-->
+                    <div class="btn-group btn-group-sm pull-right">
+					  <!--
+                      <button class="btn btn-sm btn-primary" ng-click="addServer(group.id)" title="Add Redis Server"> <span class="glyphicon glyphicon-plus"></span> Add New Redis Instance </button>
+                      <button class="btn btn-sm btn-default btn-danger" ng-click="removeServerGroup(group.id)"><span class="glyphicon glyphicon-remove"></span></button>
+					  -->
+                    </div>
+                  </div>
+                  <div class="panel-body">
+                    <table class="table table-bordered" ng-if="server_rooms.length > 0">
+                    <thead>
+                      <tr>
+						<th> 房间号 </th>
+						<th> 终端数 </th>
+						<th> 状态 </th>
+                      </tr>
+                    </thead>
+                      <tbody>
+					  	<tr ng-repeat="server_room in server_rooms">
+						  <td> <a href="/api/room/[[ server_room.room_id ]]" target="_blank"> [[ server_room.room_id ]] </a> </td>
+						  <td> [[ server_room.peer_num ]] </td>
+						  <td>
+							  <div class="btn-group btn-group-sm pull-middle">
+							  <button class="btn btn-sm btn-primary" ng-click="checkRoom( server_room )"> 查看 </button>
+							  </div>
+						  </td>
+					  	</tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+          </div>
+        </div>
+
+        <div class="row">
+			<div id="log_msg"></div>
+		</div>
+
+      </div>
+    </div>
+
+    <!-- build:js(.) scripts/vendor.js -->
+    <!-- bower:js -->
+
+	<!--
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script src="bower_components/angular-resource/angular-resource.js"></script>
+    <script src="bower_components/highcharts-ng/dist/highcharts-ng.js"></script>
+    <script src="bower_components/highcharts/highcharts.js"></script>
+    <script src="bower_components/highcharts/highcharts-more.js"></script>
+    <script src="bower_components/highcharts/modules/exporting.js"></script>
+	-->
+
+    <script src="scripts/fe1c5f5b.vendor.js"></script>
+
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:js(.) scripts/plugins.js -->
+    <!-- endbuild -->
+
+    <!-- build:js({app,.tmp}) scripts/main.js -->
+    <script src="scripts/main.js"></script>
+	<!--
+    <script src="scripts/ws.js"></script>
+	-->
+    <!-- endbuild -->
+
+  </body>
+</html>
