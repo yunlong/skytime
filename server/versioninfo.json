@@ -22,15 +22,15 @@
 	"StringFileInfo":
 	{
 		"Comments": "",
-		"CompanyName": "360企业安全集团",
-		"FileDescription": "360天擎6",
+		"CompanyName": "XXXcompany",
+		"FileDescription": "XXX6",
 		"FileVersion": "1.0.0.1001",
 		"InternalName": "skytime.exe",
-		"LegalCopyright": "(C) 360.cn All Rights Reserved",
+		"LegalCopyright": "(C) XXX.cn All Rights Reserved",
 		"LegalTrademarks": "",
 		"OriginalFilename": "skytime.exe",
 		"PrivateBuild": "",
-		"ProductName": "360天擎",
+		"ProductName": "skytime",
 		"ProductVersion": "1.0.0.1001",
 		"SpecialBuild": ""
 	},	

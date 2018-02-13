@@ -1,6 +1,5 @@
 /**
- * @copyright       Copyright (C) 360.cn 2016
- * @author         YunLong.Lee    <liyunlong-s@360.cn>
+ * @author         YunLong.Lee    <yunlong.lee@163.com>
  * @version        0.5
  */
 package main

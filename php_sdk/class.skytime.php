@@ -5,7 +5,6 @@
  *	desc      : class skytime for long connection of skylar
  *  author    : yunlong.lee
  *  mail      : yunlong.lee@163.com
- *  copyright : b.360.cn
  */
 
 const API_BROADCAST_ALL 	= "/api/broadcast_all";
